@@ -67,16 +67,13 @@ namespace Lab13_Sklad_main_HOI
             SkladName = "DefaultSklad"; // Значення за замовчуванням
         }
 
-        // Метод для створення безпечного імені файлу зі назви складу
         private string GetSafeFileName()
         {
             string safeName = SkladName;
-            // Замінюємо небезпечні символи для імені файлу
             foreach (char c in System.IO.Path.GetInvalidFileNameChars())
             {
                 safeName = safeName.Replace(c, '_');
             }
-            // Замінюємо пробіли на підкреслення
             safeName = safeName.Replace(' ', '_');
             return safeName;
         }
@@ -97,24 +94,11 @@ namespace Lab13_Sklad_main_HOI
             TabSklad.Rows.Add(rowSklad);
         }
 
-        public void ColumnPropSet(DataGridView DGV)
-        {
-            DGV.Columns["N_пп"].HeaderText = "№ п/п";
-            DGV.Columns["Група"].HeaderText = "Група";
-            DGV.Columns["Назва"].HeaderText = "Назва";
-            DGV.Columns["Виробник"].HeaderText = "Виробник";
-            DGV.Columns["Постачальник"].HeaderText = "Постачальник";
-            DGV.Columns["Од_виміру"].HeaderText = "Од. виміру";
-            DGV.Columns["Кількість"].HeaderText = "Кількість";
-            DGV.Columns["Ціна"].HeaderText = "Ціна";
-            DGV.Columns["Вартість"].HeaderText = "Вартість";
-        }
 
         public void ZapTabFile()
         {
             string sNameFile, textRow;
             string sdir = Directory.GetCurrentDirectory();
-            // Створюємо унікальне ім'я файлу на основі назви складу
             string safeFileName = GetSafeFileName();
             sNameFile = sdir + @"\FTabSklad_" + safeFileName + ".txt";
             
@@ -145,13 +129,11 @@ namespace Lab13_Sklad_main_HOI
         {
             string sNameFile;
             string sdir = Directory.GetCurrentDirectory();
-            // Використовуємо унікальне ім'я файлу на основі назви складу
             string safeFileName = GetSafeFileName();
             sNameFile = sdir + @"\FTabSklad_" + safeFileName + ".txt";
 
             if (!File.Exists(sNameFile))
             {
-                // Файл не існує - це нормально для нового складу
                 return;
             }
 
@@ -535,33 +517,6 @@ namespace Lab13_Sklad_main_HOI
             {
                 MessageBox.Show("Помилка при завантаженні довідника одиниць виміру: " + e.Message);
                 return false;
-            }
-        }
-
-        public void RefreshComboBoxGrupa(ComboBox cb)
-        {
-            cb.Items.Clear();
-            foreach (DataRow r in DovGrupa.Rows)
-            {
-                cb.Items.Add(r["Група"]);
-            }
-        }
-
-        public void RefreshComboBoxPostachalnyk(ComboBox cb)
-        {
-            cb.Items.Clear();
-            foreach (DataRow r in DovPostachalnyk.Rows)
-            {
-                cb.Items.Add(r["Постачальник"]);
-            }
-        }
-
-        public void RefreshComboBoxOdVym(ComboBox cb)
-        {
-            cb.Items.Clear();
-            foreach (DataRow r in DovOdVym.Rows)
-            {
-                cb.Items.Add(r["Од_виміру"]);
             }
         }
 

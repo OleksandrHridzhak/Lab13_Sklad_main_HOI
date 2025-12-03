@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Printing;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -57,7 +56,7 @@ namespace Lab13_Sklad_main_HOI
             foreach (string name in skladNames)
             {
                 TSklad sklad = new TSklad();
-                sklad.SkladName = name; // Встановлюємо назву складу для унікального імені файлу
+                sklad.SkladName = name;
                 sklad.CreateDovGrupa();
                 sklad.CreateDovPostachalnyk();
                 sklad.CreateDovOdVym();
@@ -74,7 +73,6 @@ namespace Lab13_Sklad_main_HOI
                 TreeNode skladNode = new TreeNode(skladPair.Key);
                 skladNode.Tag = skladPair.Key;
 
-                // Додаємо групи як дочірні вузли
                 foreach (DataRow row in skladPair.Value.DovGrupa.Rows)
                 {
                     TreeNode groupNode = new TreeNode(row["Група"].ToString());
@@ -92,7 +90,6 @@ namespace Lab13_Sklad_main_HOI
         {
             if (e.Node.Parent == null)
             {
-                // Вибрано склад
                 string skladName = e.Node.Tag.ToString();
                 if (Sklady.ContainsKey(skladName))
                 {
@@ -149,10 +146,13 @@ namespace Lab13_Sklad_main_HOI
 
         private void BAddRowToTable_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(CBGrupa.Text) || 
+            if (string.IsNullOrWhiteSpace(CBGrupa.Text) ||
                 string.IsNullOrWhiteSpace(TBNazva.Text) ||
+                string.IsNullOrWhiteSpace(TBVyrobnyk.Text) ||
                 string.IsNullOrWhiteSpace(CBPostachalnyk.Text) ||
-                string.IsNullOrWhiteSpace(CBOdVym.Text))
+                string.IsNullOrWhiteSpace(CBOdVym.Text) ||
+                string.IsNullOrWhiteSpace(TBKilkist.Text) ||
+                string.IsNullOrWhiteSpace(TBCina.Text))
             {
                 MessageBox.Show("Заповніть всі обов'язкові поля!", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
@@ -171,11 +171,10 @@ namespace Lab13_Sklad_main_HOI
                 return;
             }
 
-            MySklad.TSkladAddRow(CBGrupa.Text, TBNazva.Text, TBVyrobnyk.Text, 
+            MySklad.TSkladAddRow(CBGrupa.Text, TBNazva.Text, TBVyrobnyk.Text,
                                 CBPostachalnyk.Text, CBOdVym.Text, pKilkist, pPcina);
             MySklad.SetSumy(DGSkladSum);
 
-            // Очищуємо поля вводу
             TBNazva.Clear();
             TBVyrobnyk.Clear();
             TBKilkist.Clear();
@@ -274,7 +273,6 @@ namespace Lab13_Sklad_main_HOI
 
         private void SearchByNameMenuItem_Click(object sender, EventArgs e)
         {
-            string sNazva;
             Form SeekDialog = new FServ();
             SeekDialog.Text = "Введіть назву:";
             SeekDialog.ShowDialog();
@@ -390,23 +388,10 @@ namespace Lab13_Sklad_main_HOI
                     yPos += cellHeight;
                 }
             }
-
-            // Підсумок
-            yPos += 30;
-            decimal totalValue = 0;
-            foreach (DataGridViewRow row in printGrid.Rows)
-            {
-                if (!row.IsNewRow && row.Cells["Вартість"].Value != null)
-                {
-                    totalValue += Convert.ToDecimal(row.Cells["Вартість"].Value);
-                }
-            }
-            e.Graphics.DrawString($"Загальна вартість: {totalValue:F2} грн", headerFont, Brushes.Black, leftMargin, yPos);
         }
 
         private void StatByGroupMenuItem_Click(object sender, EventArgs e)
         {
-            // Показуємо статистику по групам у вже існуючому DGSkladSum
             MySklad.SetSumy(DGSkladSum);
             
             Form statForm = new Form();
@@ -433,7 +418,6 @@ namespace Lab13_Sklad_main_HOI
 
             foreach (DataRowView rowView in MySklad.SkladView)
             {
-                // Перевірка на null
                 if (rowView["Постачальник"] == null || rowView["Постачальник"] == DBNull.Value)
                     continue;
                 
@@ -468,7 +452,7 @@ namespace Lab13_Sklad_main_HOI
             dgvStat.Dock = DockStyle.Fill;
             dgvStat.ReadOnly = true;
             
-            statForm.Controls.Add(dgvStat);  // Move this BEFORE DataSource
+            statForm.Controls.Add(dgvStat);  
             dgvStat.DataSource = statTable;
             dgvStat.Columns["Загальна вартість"].DefaultCellStyle.Format = "F2";
             
@@ -485,19 +469,16 @@ namespace Lab13_Sklad_main_HOI
 
             foreach (DataRowView rowView in MySklad.SkladView)
             {
-                // Перевірка на null для критичних полів
                 if (rowView["Група"] == null || rowView["Група"] == DBNull.Value)
                     continue;
                 
                 totalCount++;
-                
-                // Перевірка для Вартості
+
                 if (rowView["Вартість"] != null && rowView["Вартість"] != DBNull.Value)
                 {
                     totalValue += Convert.ToDecimal(rowView["Вартість"]);
                 }
                 
-                // Перевірка для Кількості
                 if (rowView["Кількість"] != null && rowView["Кількість"] != DBNull.Value)
                 {
                     totalQuantity += Convert.ToDecimal(rowView["Кількість"]);
